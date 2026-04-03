@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Snake Game</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #6b8c2a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+  }
+
+  .wrapper {
+    position: relative;
+  }
+
+  /* Exit button - top left */
+  #btn-exit {
+    position: absolute;
+    top: -36px;
+    left: 0;
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  /* Score - top right */
+  #score-display {
+    position: absolute;
+    top: -30px;
+    right: 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #111;
+  }
+
+  canvas {
+    display: block;
+    background: #c8e6a0;
+    border: 6px solid #c90845;
+    border-radius: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <button id="btn-exit" onclick="exitGame()">Exit</button>
+  <div id="score-display">Score: 0</div>
+  <canvas id="canvas" width="400" height="400"></canvas>
+</div>
+
+<script>
+  const eatsound=new Audio('eat.mp3');
+  const gameoversound=new Audio('over.mp3');
+  const movesound=new Audio('play.mp3');
+  const exitsound=new Audio('button.mp3');
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const GRID = 20, COLS = 20, ROWS = 20;
+
+let snake, dir, nextDir, food, score;
+let gameLoop = null;
+
+startGame();
+
+function startGame() {
+  snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+  dir = {x:1, y:0};
+  nextDir = {x:1, y:0};
+  score = 0;
+  updateScore();
+  placeFood();
+  clearInterval(gameLoop);
+  gameLoop = setInterval(step, 130);
+}
+
+function placeFood() {
+  let pos;
+  do {
+    pos = { x: Math.floor(Math.random()*COLS), y: Math.floor(Math.random()*ROWS) };
+  } while (snake.some(s => s.x===pos.x && s.y===pos.y));
+  food = pos;
+}
+
+function step() {
+  dir = nextDir;
+  const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+  if (head.x<0 || head.x>=COLS || head.y<0 || head.y>=ROWS || snake.some(s=>s.x===head.x&&s.y===head.y)) {
+    clearInterval(gameLoop);
+    setTimeout(startGame, 1000);
+    return;
+  }
+
+  snake.unshift(head);
+
+  if (head.x===food.x && head.y===food.y) {
+    score++;
+    updateScore();
+    placeFood();
+    eatsound.play();
+  } else {
+    snake.pop();
+    
+  }
+
+  draw();
+}
+
+function updateScore() {
+  document.getElementById('score-display').textContent = 'Score: ' + score;
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Food
+  ctx.fillStyle = '#e53935';
+  ctx.fillRect(food.x*GRID+1, food.y*GRID+1, GRID-2, GRID-2);
+  movesound.play();
+
+  // Snake
+  snake.forEach((seg, i) => {
+    ctx.fillStyle = (i === 0) ? '#ce93d8' : '#7b1fa2';
+    ctx.fillRect(seg.x*GRID+1, seg.y*GRID+1, GRID-2, GRID-2);
+    so
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowLeft'  && dir.x!==1)  nextDir = {x:-1, y:0};
+  if (e.key==='ArrowRight' && dir.x!==-1) nextDir = {x:1,  y:0};
+  if (e.key==='ArrowUp'    && dir.y!==1)  nextDir = {x:0,  y:-1};
+  if (e.key==='ArrowDown'  && dir.y!==-1) nextDir = {x:0,  y:1};
+});
+
+function exitGame() {
+  clearInterval(gameLoop);
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 26px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('Game Exited', canvas.width/2, canvas.height/2);
+  ctx.font = '15px Arial';
+  ctx.fillText('Refresh to play again', canvas.width/2, canvas.height/2 + 30);
+exitsound.play();
+}
+
+draw();
+</script>
+</body>
+</html>

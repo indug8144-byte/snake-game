@@ -1,0 +1,53 @@
+body {
+    background: #111;
+    font-family: Arial;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Box */
+.menu-box {
+    border: 2px solid lime;
+    padding: 30px;
+    text-align: center;
+    border-radius: 10px;
+    color: white;
+}
+
+/* Title */
+h1 {
+    color: lime;
+    letter-spacing: 5px;
+}
+
+/* Buttons */
+button {
+    display: block;
+    width: 180px;
+    margin: 10px auto;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Colors */
+#startBtn {
+    background: lime;
+    color: black;
+}
+
+#soundBtn {
+    background: lightgray;
+}
+
+#exitBtn {
+    background: red;
+    color: white;
+}
+
+
+

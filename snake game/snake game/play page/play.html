@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Snake Game</title>
+    <style>
+        :root {
+            --bg: #2f6909;
+            --panel: #3b1e37;
+            --snake: #c77b09;
+            --food: #fb4b24;
+            --poison: #0e0a0a;
+        }
+
+        body {
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: white;
+        }
+
+        canvas {
+            border-radius: 8px;
+            background: #1b8c0e;
+            display: block;
+            margin-top: 15px;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 1.2rem;
+            padding: 0 10px;
+        }
+
+        #effect-tag {
+            color: var(--poison);
+            font-size: 0.8rem;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="status-bar">
+            <span>Score: <span id="score">0</span></span>
+            <span id="effect-tag"></span>
+        </div>
+        <canvas id="snakeCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <script>
+        const audiosound=new Audio("nahtt-eat-323883.mp3");
+        const canvas = document.getElementById("snakeCanvas");
+        const ctx = canvas.getContext("2d");
+        const scoreEl = document.getElementById("score");
+        const effectEl = document.getElementById("effect-tag");
+
+        let box = 20;
+        let score = 0;
+        let speed = 120;
+        let isPoisoned = false;
+
+        let snake = [{x: 10 * box, y: 10 * box}];
+        let food = spawnItem();
+        let poison = spawnItem();
+        let d = "RIGHT";
+
+        document.addEventListener("keydown", (e) => {
+            if(e.key === "ArrowLeft" && d !== "RIGHT") d = "LEFT";
+            if(e.key === "ArrowUp" && d !== "DOWN") d = "UP";
+            if(e.key === "ArrowRight" && d !== "LEFT") d = "RIGHT";
+            if(e.key === "ArrowDown" && d !== "UP") d = "DOWN";
+        });
+
+        function spawnItem() {
+            return {
+                x: Math.floor(Math.random() * 19 + 1) * box,
+                y: Math.floor(Math.random() * 19 + 1) * box
+            };
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Snake
+            snake.forEach((part, i) => {
+                ctx.fillStyle = i === 0 ? (isPoisoned ? "#a855f7" : "#22c55e") : "#166534";
+                ctx.beginPath();
+                ctx.roundRect(part.x, part.y, box-2, box-2, 4);
+                ctx.fill();
+            });
+
+            // Draw Food
+            ctx.fillStyle = "#fbbf24";
+            ctx.beginPath();
+            ctx.arc(food.x + box/2, food.y + box/2, box/2 - 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw Poison
+            ctx.fillStyle = "#a855f7";
+            ctx.shadowBlur = isPoisoned ? 15 : 0;
+            ctx.shadowColor = "#a855f7";
+            ctx.fillRect(poison.x + 5, poison.y + 5, box - 10, box - 10);
+            ctx.shadowBlur = 0;
+
+            let headX = snake[0].x;
+            let headY = snake[0].y;
+
+            if(d === "LEFT") headX -= box;
+            if(d === "UP") headY -= box;
+            if(d === "RIGHT") headX += box;
+            if(d === "DOWN") headY += box;
+
+            // Collision Logic
+            if(headX === food.x && headY === food.y) {
+                score += isPoisoned ? 5 : 1;
+                scoreEl.innerText = score;
+                food = spawnItem();
+            } else if(headX === poison.x && headY === poison.y) {
+                triggerPoison();
+                poison = spawnItem();
+            } else {
+                snake.pop();
+            }
+
+            let newHead = {x: headX, y: headY};
+
+            if(headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height || snake.some(s => s.x === newHead.x && s.y === newHead.y)) {
+                alert("Game Over! Score: " + score);
+                location.reload();
+            }
+
+            snake.unshift(newHead);
+        }
+
+        function triggerPoison() {
+            isPoisoned = true;
+            effectEl.innerText = "Poisoned! Speed Up!";
+            clearInterval(game);
+            game = setInterval(draw, 50); // Double speed
+            
+            setTimeout(() => {
+                isPoisoned = false;
+                effectEl.innerText = "";
+                clearInterval(game);
+                game = setInterval(draw, speed); // Reset speed
+            }, 5000);
+        }
+
+        let game = setInterval(draw, speed);
+    </script>
+</body>
+</html>
